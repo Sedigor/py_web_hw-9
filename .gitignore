@@ -153,3 +153,4 @@ cython_debug/
 
 ref.py
 ref2.py
+config.ini
