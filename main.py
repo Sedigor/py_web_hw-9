@@ -1,8 +1,13 @@
 from models import Author, Quote
 import connect
+import scrapin
+import seed
 
 
 def main():
+    
+    scrapin.main()
+    seed.main()
     
     while True:
         

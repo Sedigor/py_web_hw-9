@@ -1,6 +1,5 @@
 import requests
-import re
-
+import json
 from bs4 import BeautifulSoup
 
 
@@ -28,7 +27,7 @@ def get_page_urls(base_url: str):
     return urls
 
 
-def get_author_urls(page_urls: list(str), base_url: str):
+def get_author_urls(page_urls: list, base_url: str):
     author_urls = []
     
     for url in page_urls:
@@ -60,40 +59,62 @@ def get_author_info(author_urls: list):
     return authors
 
 
-def tags_to_string(soup_object):
-    tagsforquote = soup_object.find_all('a', class_='tag')
-    tag_list = [tagforquote.text for tagforquote in tagsforquote]
-    return tag_list
+def save_to_json(data_list, filename):
+    indent = len(data_list[0]) - 1
+    with open(filename, 'w', encoding='utf-8') as fd:
+        json.dump(data_list, fd, ensure_ascii=False, indent=indent)
 
 
-def spider(urls: list):
-    authors = []
-    quotes = []
+# def tags_to_string(soup_object):
+#     tagsforquote = soup_object.find_all('a', class_='tag')
+#     tag_list = [tagforquote.text for tagforquote in tagsforquote]
+#     return tag_list
+
+
+
+def get_quotes(urls: list):
+    quote_list = []
     
     for url in urls:
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'lxml')
         quotes = soup.find_all('span', class_='text')
         authors = soup.find_all('small', class_='author')
-        tags_object = soup.find_all('div', class_='tags')
-        tags = tags_to_string(tags_object)
+        tags = soup.find_all('div', class_='tags')
 
-# for i in range(0, len(quotes)):
-#     print(quotes[i].text)
-#     print('--' + authors[i].text)
-#     tagsforquote = tags[i].find_all('a', class_='tag')
-#     for tagforquote in tagsforquote:
-#         print(tagforquote.text)
-#     break
+        for i in range(len(quotes)):
+            tagsforquote = tags[i].find_all('a', class_='tag')
+            
+            quote = {
+                'tags': [tagforquote.text for tagforquote in tagsforquote],
+                'author': authors[i].text,
+                'quote': quotes[i].text
+                }
+            quote_list.append(quote)
+    return quote_list
+            
 
-
-if __name__ == '__main__':
+def main():
     
     base_url = 'http://quotes.toscrape.com'
     
+    author_file_name = 'authors.json'
+    quotes_file_name = 'quotes.json'
+    
+    # find all pages on website for scrapin
     page_urls = get_page_urls(base_url)
+    
+    # find all pages with author information
     author_urls = get_author_urls(page_urls, base_url)
+    
+    # get author list and save to json file
     authors = get_author_info(author_urls)
+    save_to_json(authors, author_file_name)
     
-    
-    
+    # get quote list and save to json file
+    quotes = get_quotes(page_urls)
+    save_to_json(quotes, quotes_file_name)
+
+
+if __name__ == '__main__':
+    main()

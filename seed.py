@@ -20,8 +20,11 @@ def load_data_from_json(file_name, model):
         db_data_name = file_name.split('.')[0].title()
         print(f'{db_data_name} added to database')
         
-            
-if __name__ == '__main__':
+
+def main():
     load_data_from_json('authors.json', Author)
-    load_data_from_json('quotes.json', Quote)
-    
+    load_data_from_json('quotes.json', Quote)           
+
+
+if __name__ == '__main__':
+    main()
